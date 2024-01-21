@@ -2,11 +2,11 @@ use crate::args::Cli;
 use clap::Parser;
 use config::Config;
 pub mod args;
-pub mod config;
+pub mod conf;
 
 fn main() {
     let args = Cli::parse();
-    let mut conf = Config::fallback_menu();
+    let mut conf = conf::fallback_menu();
     conf.items.push(config::BootItem {
         name: "Linux".to_owned(),
         target: config::BootTarget::EFI {

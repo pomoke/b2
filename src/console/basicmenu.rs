@@ -1,15 +1,16 @@
-use crate::config::boot_config::BootOption;
-use crate::config::boot_config::BootOptionKind;
-use crate::config::boot_config::BootOptionSelection;
 use crate::platform::ToError;
 use alloc::format;
 use alloc::string::String;
 use anyhow::anyhow;
 use anyhow::Result;
+use config::BootOption;
+use config::BootOptionKind;
+use config::BootOptionSelection;
 
-use crate::config::BootItem;
+use crate::io::console::Console;
 use crate::io::{LineEdit, ReadString};
-use crate::{config::Config, io::console::Console};
+use config::BootItem;
+use config::Config;
 
 use alloc::{vec, vec::Vec};
 

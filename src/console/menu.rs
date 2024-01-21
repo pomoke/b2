@@ -1,9 +1,7 @@
 use anyhow::Result;
 
-use crate::{
-    config::{BootItem, Config},
-    io::console::Console,
-};
+use crate::io::console::Console;
+use config::boot::{BootItem, Config};
 
 /// Show menu, then retrieve user selection.
 ///

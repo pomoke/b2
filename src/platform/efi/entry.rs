@@ -16,11 +16,11 @@ use uefi::prelude::*;
 use uefi::proto::console::gop::{BltOp, BltPixel, GraphicsOutput};
 
 use crate::boot::boot::BootAble;
-use crate::config::Config;
 use crate::console::basicmenu::BasicMenu;
 use crate::platform::efi::boot::EFIBoot;
 use crate::platform::efi::efi_error::ToError;
 use crate::platform::efi::file::EFIFile;
+use config::Config;
 use uefi::Result;
 use uefi_services::println;
 
@@ -28,7 +28,7 @@ use uefi_services::println;
 #[panic_handler]
 fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     println!("\nb2 has ran into some problem, system halted.");
-    println!("panic: {}\n" ,info);
+    println!("panic: {}\n", info);
     println!("If you believe this is some sort of bug, report at github.com/pomoke/b2 .");
 
     #[cfg(target_arch = "x86_64")]
@@ -82,10 +82,9 @@ pub fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
     use anyhow::anyhow;
     use uefi::{guid, table::runtime::VariableVendor};
 
-    use crate::{
-        config::boot_config::{BootOption, BootOptionItem, BootOptionKind},
-        io::file::File,
-    };
+    use crate::{io::file::File, config::{BootConfig, do_boot}};
+
+    use config::{BootOption, BootOptionItem, BootOptionKind};
 
     uefi_services::init(&mut st).unwrap();
     let rev = st.uefi_revision();
@@ -99,27 +98,24 @@ pub fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
 
     //bs.set_watchdog_timer(0, 0, None).core_err().context("Failed to stop watchdog.").unwrap();
 
-    let mut config: Config =
+    let mut config: BootConfig =
         File::<EFIFile>::open("b2.conf")
             .and_then(|x| x.read_all())
             .or_else(|_| {
-                rs.get_variable_boxed(
-                    cstr16!("Config"),
-                    &VariableVendor(B2_UUID),
-                )
-                .core_err()
-                .map(|x| x.0.into_vec())
+                rs.get_variable_boxed(cstr16!("Config"), &VariableVendor(B2_UUID))
+                    .core_err()
+                    .map(|x| x.0.into_vec())
             })
             .and_then(|x| {
                 Ok(serde_json_core::from_slice::<Config>(x.as_slice())
                     .map_err(|x| anyhow!("{}", x))?)
             })
-            .map(|x| x.0)
+            .map(|x| BootConfig(x.0))
             .inspect_err(|e| println!("error loading config: {:?}", e))
-            .unwrap_or(Config::fallback_menu());
+            .unwrap_or(BootConfig::fallback_menu());
 
     let mut console = EFIConsole::from_system_table();
-    let boot_config = Config::fallback_menu();
+    let boot_config = BootConfig::fallback_menu();
     let mut buf = String::new();
     //console.edit_line(&mut buf, "test: ").unwrap();
 
@@ -171,9 +167,9 @@ pub fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
     //menu.boot_config(&bootconf_test, &mut console).unwrap();
 
     loop {
-        let option = menu.prompt(&boot_config, &mut console).unwrap();
+        let option = menu.prompt(&boot_config.0, &mut console).unwrap();
         println!("{:?}", option);
-        let boot_result = option.target.boot();
+        let boot_result = do_boot(&option.target);
         match boot_result {
             // Ok() variant is used to indicate exit without error.
             Ok(true) => break,

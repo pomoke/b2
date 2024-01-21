@@ -23,9 +23,9 @@ use uefi::{
 };
 use uefi_services::{println, system_table};
 
-use crate::config::BootTarget;
 use crate::io::file;
 use crate::{io::file::File, platform::ToError};
+use config::BootTarget;
 
 use crate::platform::PlatformFile;
 
@@ -217,9 +217,9 @@ pub fn boot(target: &BootTarget) -> anyhow::Result<bool> {
             Ok(false)
         }
         BootTarget::Panic => {
-            Err::<bool,_>(anyhow!("User requested panic!")).unwrap();
+            Err::<bool, _>(anyhow!("User requested panic!")).unwrap();
             unreachable!();
-        },
+        }
         _ => {
             warn!("unknown or unsupported boot target {:?}.", target);
             Ok(false)

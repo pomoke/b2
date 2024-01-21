@@ -1,72 +1,42 @@
+#![allow(unused)]
+
+extern crate alloc;
+use core::fmt::Display;
+
+#[cfg(feature = "no_std")]
+use alloc::{borrow::ToOwned, string::String, vec, vec::Vec};
+
 use serde::{Deserialize, Serialize};
 
+/// The configuration of b2.
+/// If config is unavailable or broken, b2 will simply load the fallback menu.
+/// Config can be stored in EFI variable or files in %ESP on UEFI-based machines.
+/// Config can be as well saved in NVRAM, a partition or in the bootloader.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     /// Alternative title.
-    pub(crate) name: Option<String>,
+    pub name: Option<String>,
     /// Message
-    pub(crate) message: Option<String>,
+    pub message: Option<String>,
     /// Menu items.
-    pub(crate) items: Vec<BootItem>,
+    pub items: Vec<BootItem>,
     /// Default item, counts from 0.
     /// If the value is not in valid range, then first item (with id 0) will be selected.
-    pub(crate) default: u32,
+    pub default: u32,
     /// Auto-boot timeout, in seconds.
     ///
     /// Special values:
     /// * `None`: the bootloader waits for user interaction.
     /// * `Some(0)`: the bootloader will not show the menu and try to boot immediately. Press any key to show menu.
-    pub(crate) timeout: Option<u32>,
+    pub timeout: Option<u32>,
     /// If this option is set, a password will be required for whole bootloader.
-    pub(crate) password: Option<String>,
-}
-
-impl Config {
-    pub fn fallback_menu() -> Self {
-        Config {
-            name: Some("b2 Menu".to_owned()),
-            message: Some("".to_owned()),
-            items: vec![
-                #[cfg(target_os = "uefi")]
-                BootItem {
-                    name: "Linux".to_owned(),
-                    target: BootTarget::EFI {
-                        path: "/linux/vmlinuz".to_owned(),
-                        cmdline: Some("initrd=\\linux\\initrd.gz".to_owned()),
-                    },
-                },
-                BootItem {
-                    name: "Reboot".to_owned(),
-                    target: BootTarget::Reboot,
-                },
-                BootItem {
-                    name: "Poweroff".to_owned(),
-                    target: BootTarget::Poweroff,
-                },
-                BootItem {
-                    name: "Firmware Setup".to_owned(),
-                    target: BootTarget::FirmwareSetup,
-                },
-                BootItem {
-                    name: "Exit".to_owned(),
-                    target: BootTarget::Exit,
-                },
-                BootItem {
-                    name: "Debug Info".to_owned(),
-                    target: BootTarget::Debug,
-                },
-            ],
-            default: 0,
-            timeout: None,
-            password: None,
-        }
-    }
+    pub password: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BootItem {
     pub name: String,
-    pub(crate) target: BootTarget,
+    pub target: BootTarget,
 }
 
 /// Boot Target - represents a bootable target.
@@ -108,18 +78,23 @@ pub enum BootTarget {
     /// Nothing happens.
     #[serde(rename = "nop")]
     Nop,
+    /// Bootloader will panic. Only available in debug builds.
+    #[serde(rename = "panic")]
+    Panic,
+    /// Unknown.
+    #[serde(rename = "unknown")]
+    #[serde(other)]
+    Unknown,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ImageLocation {
+    /// A path in file system.
     Path(String),
     /// A whole partition as image.
     /// TODO: Auto-detection of single image and compound partition.
-    Partition {
-        disk: i32,
-        part: i32,
-    },
+    Partition { disk: i32, part: i32 },
     /// Offsets in a partition.
     /// Use ioctl(FIBMAP) to get offsets of kernel image.
     Segments {
@@ -132,7 +107,6 @@ pub enum ImageLocation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type")]
 pub struct Extent {
     from: u32,
     length: u32,

@@ -1,4 +1,4 @@
-use uefi::{Guid, guid};
+use uefi::{guid, Guid};
 
 pub mod boot;
 pub mod console;
