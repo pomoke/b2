@@ -17,6 +17,8 @@ use core::arch::asm;
 use core::panic;
 use once_cell::unsync::OnceCell;
 
+use crate::console::efi::EFIConsole;
+use crate::io::ReadOne;
 use alloc::boxed::Box;
 use alloc::vec;
 use anyhow::{anyhow, Context};
@@ -30,8 +32,6 @@ use uefi::proto::media::file::FileInfo;
 use uefi::CStr16;
 use uefi::Result;
 use uefi_services::{println, system_table};
-use crate::io::ReadOne;
-use crate::console::efi::EFIConsole;
 
 #[cfg(not(all(target_arch = "x86_64", target_os = "uefi")))]
 compile_error!("b2 only supports x86_64-unknown-uefi for now.");
@@ -120,7 +120,7 @@ fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
 
     let mut console = EFIConsole::from_system_table();
     loop {
-        println!("{:?}",console.read_one().unwrap());
+        println!("{:?}", console.read_one().unwrap());
     }
 
     /*

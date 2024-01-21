@@ -7,7 +7,7 @@ use anyhow::{anyhow, Context, Result};
 use uefi::{
     prelude::BootServices,
     proto::console::text::{Input, Output},
-    table::{boot::ScopedProtocol, SystemTable, Boot},
+    table::{boot::ScopedProtocol, Boot, SystemTable},
     Event,
 };
 use uefi_services::system_table;
@@ -28,23 +28,32 @@ pub struct EFIConsole<'a> {
 }
 
 impl<'a> EFIConsole<'a> {
-    pub fn new(input: &'a mut Input,output: &'a mut Output<'a>,boot_service: &'a BootServices) -> Self {
+    pub fn new(
+        input: &'a mut Input,
+        output: &'a mut Output<'a>,
+        boot_service: &'a BootServices,
+    ) -> Self {
         Self {
             input,
             output,
-            boot_service
+            boot_service,
         }
     }
 
+    /// Acquire current terminal.
+    ///
+    /// This function uses some of terrible conversions and violates reference rules.
     pub fn from_system_table() -> Self {
-        let st = unsafe {system_table().as_mut()};
-        let st2 = unsafe {system_table().as_mut()};
-        let st3 = unsafe {system_table().as_mut()};
-        let boot_service = st2.boot_services();
-        let input = st.stdin();
+        let st = unsafe { system_table().as_mut() };
+        let st2 = unsafe { system_table().as_mut() };
+        let st3 = unsafe { system_table().as_mut() };
+        let boot_service = st.boot_services();
+        let input = st2.stdin();
         let output = st3.stdout();
         Self {
-            input,output,boot_service
+            input,
+            output,
+            boot_service,
         }
     }
 }
