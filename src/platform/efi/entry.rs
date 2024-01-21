@@ -107,8 +107,8 @@ pub fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
                     .map(|x| x.0.into_vec())
             })
             .and_then(|x| {
-                Ok(serde_json_core::from_slice::<Config>(x.as_slice())
-                    .map_err(|x| anyhow!("{}", x))?)
+                serde_json_core::from_slice::<Config>(x.as_slice())
+                    .map_err(|x| anyhow!("{}", x))
             })
             .map(|x| BootConfig(x.0))
             .inspect_err(|e| println!("error loading config: {:?}", e))

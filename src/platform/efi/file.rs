@@ -17,6 +17,7 @@ pub struct EFIFile {
     file: FileHandle,
 }
 
+#[allow(unused)]
 impl File<EFIFile> {
     pub fn open(path: &str) -> Result<Self> {
         let st = unsafe { system_table() };

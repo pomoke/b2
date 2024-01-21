@@ -163,9 +163,9 @@ impl<T: ?Sized + Console> LineEdit for T {
                         buf.insert(str_pos, k);
                         if str_pos + 1 == buf.len() {
                             // Append
-                            redraw = (str_pos - left_pos + prompt.len() as usize) >= (size.0 - 2);
+                            redraw = (str_pos - left_pos + prompt.len()) >= (size.0 - 2);
                             left_pos =
-                                if (str_pos - left_pos + prompt.len() as usize) < (size.0 - 2) {
+                                if (str_pos - left_pos + prompt.len() ) < (size.0 - 2) {
                                     left_pos
                                 } else {
                                     left_pos + 1
@@ -177,7 +177,7 @@ impl<T: ?Sized + Console> LineEdit for T {
                             // Insert
                             redraw = true;
                             left_pos =
-                                if (str_pos - left_pos + prompt.len() as usize) < (size.0 - 2) {
+                                if (str_pos - left_pos + prompt.len() ) < (size.0 - 2) {
                                     left_pos
                                 } else {
                                     left_pos + 1
@@ -196,7 +196,7 @@ impl<T: ?Sized + Console> LineEdit for T {
 
                         // Always redraw on replace.
                         redraw = true;
-                        left_pos = if (str_pos - left_pos + prompt.len() as usize) < (size.0 - 2) {
+                        left_pos = if (str_pos - left_pos + prompt.len()) < (size.0 - 2) {
                             left_pos
                         } else {
                             left_pos + 1
@@ -213,14 +213,14 @@ impl<T: ?Sized + Console> LineEdit for T {
                 Key::Accelerator(k @ (AcceleratorKey::Backspace | AcceleratorKey::Delete)) => {
                     match k {
                         AcceleratorKey::Backspace => {
-                            if str_pos as isize - 1 >= 0 {
+                            if str_pos as isize > 0 {
                                 buf.replace_range((str_pos - 1)..str_pos, "");
                                 redraw = true;
                                 str_pos -= 1;
                             }
                         }
                         AcceleratorKey::Delete => {
-                            if str_pos + 1 <= buf.len() {
+                            if str_pos < buf.len() {
                                 buf.replace_range(str_pos..(str_pos + 1), "");
                                 redraw = true;
                             }
@@ -241,7 +241,7 @@ impl<T: ?Sized + Console> LineEdit for T {
                     | AcceleratorKey::End),
                 ) => match k {
                     AcceleratorKey::Left => {
-                        if str_pos as isize - 1 >= 0 {
+                        if str_pos as isize > 0 {
                             str_pos -= 1;
                             if left_pos >= str_pos {
                                 left_pos = str_pos;
@@ -250,7 +250,7 @@ impl<T: ?Sized + Console> LineEdit for T {
                         }
                     }
                     AcceleratorKey::Right => {
-                        if str_pos + 1 <= buf.len() {
+                        if str_pos < buf.len() {
                             str_pos += 1;
                             if str_pos - left_pos >= available_width {
                                 left_pos += 1;

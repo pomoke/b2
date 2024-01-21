@@ -39,7 +39,7 @@ pub fn make_parameter(
             (BootOptionKind::Template(template), BootOptionSelection::Template(value)) => {
                 if let Some(value) = value {
                     let target = &mut ret[i.pos as usize];
-                    target.push_str(&template);
+                    target.push_str(template);
                     target.push_str(value);
                     target.push(' ');
                 }

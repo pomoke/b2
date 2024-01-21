@@ -104,7 +104,7 @@ impl BootAble for EFIBoot {
             )
             .core_err()?;
         let file_device = device_path_to_text
-            .convert_device_path_to_text(bs, &file_path, DisplayOnly(false), AllowShortcuts(false))
+            .convert_device_path_to_text(bs, file_path, DisplayOnly(false), AllowShortcuts(false))
             .core_err()?;
         let mut full_path = String::new();
         root_device
@@ -217,8 +217,7 @@ pub fn boot(target: &BootTarget) -> anyhow::Result<bool> {
             Ok(false)
         }
         BootTarget::Panic => {
-            Err::<bool, _>(anyhow!("User requested panic!")).unwrap();
-            unreachable!();
+            panic!("User requested panic.");
         }
         _ => {
             warn!("unknown or unsupported boot target {:?}.", target);

@@ -69,7 +69,7 @@ pub trait Console: Write + ReadOne<Key> {
 
     /// Read a key input immediately.
     fn read_key(&mut self) -> Result<Option<Key>> {
-        self.read_one().map(|x| Some(x))
+        self.read_one().map(Some)
     }
 
     /// Get current cursor position in terminal.

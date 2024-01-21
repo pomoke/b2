@@ -33,12 +33,12 @@ impl Default for TextStyle {
 }
 
 impl TextStyle {
-    const Bold: Self = TextStyle {
+    const BOLD: Self = TextStyle {
         bold: true,
         underline: false,
         size: None,
     };
-    const Underline: Self = TextStyle {
+    const UNDERLINE: Self = TextStyle {
         underline: true,
         bold: false,
         size: None,
@@ -63,5 +63,5 @@ pub enum Color {
 }
 
 impl Color {
-    pub const Green: Self = Color::RGB(0, 255, 0);
+    pub const GREEN: Self = Color::RGB(0, 255, 0);
 }

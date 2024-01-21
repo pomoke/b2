@@ -25,17 +25,16 @@ impl BasicMenu {
         // Show title
         let title = config
             .name
-            .as_ref()
-            .map(|x| x.as_str())
+            .as_deref()
             .unwrap_or("b2 loader");
-        write!(console, "{}\n", title).map_err(|_| anyhow!("failed to write"))?;
+        writeln!(console, "{}", title).map_err(|_| anyhow!("failed to write"))?;
         // Show message
         if let Some(msg) = config.message.as_ref() {
-            write!(console, "{}\n", msg).map_err(|_| anyhow!("failed to write"))?;
+            writeln!(console, "{}", msg).map_err(|_| anyhow!("failed to write"))?;
         }
         // Show items.
         for (i, j) in config.items.iter().enumerate() {
-            write!(console, "[{}]: {}\n", i + 1, j.name).map_err(|_| anyhow!("failed to write"))?;
+            writeln!(console, "[{}]: {}", i + 1, j.name).map_err(|_| anyhow!("failed to write"))?;
         }
         // Show prompt.
 
@@ -55,19 +54,19 @@ impl BasicMenu {
             let mut buf = String::new();
             console.edit_line(&mut buf, "Boot:")?;
             let buf = buf.trim();
-            if buf.len() == 0 {
+            if buf.is_empty() {
                 continue;
             }
             let selection: Result<usize, _> = buf.parse();
             if let Ok(k) = selection {
                 if k < 1 || k > len {
-                    write!(console, "Invalid option.\n")
+                    writeln!(console, "Invalid option.")
                         .map_err(|e| anyhow!("failed to write due to {}", e))?;
                     continue;
                 }
                 return Ok(&config.items[k - 1]);
             } else {
-                write!(console, "Invalid option.\n")
+                writeln!(console, "Invalid option.")
                     .map_err(|e| anyhow!("failed to write due to {}", e))?;
                 continue;
             }
@@ -98,9 +97,9 @@ impl BasicMenu {
                                 break;
                             }
                             "?" => {
-                                write!(
+                                writeln!(
                                     console,
-                                    "Option \"{}\" ({}): {}\n",
+                                    "Option \"{}\" ({}): {}",
                                     i.name,
                                     i.identifier,
                                     i.description
@@ -110,17 +109,17 @@ impl BasicMenu {
                                 .core_err()?;
                             }
                             _ => {
-                                write!(console, "{} is not a valid option.\n", buf).core_err()?;
+                                writeln!(console, "{} is not a valid option.", buf).core_err()?;
                             }
                         }
                     }
                     BootOptionKind::Multiple(k) => {
-                        write!(console, "{}:\n", i.name).core_err()?;
+                        writeln!(console, "{}:", i.name).core_err()?;
                         for (i, item) in k.iter().enumerate() {
                             // Indent is intentional.
-                            write!(
+                            writeln!(
                                 console,
-                                "{} {}. {}\n",
+                                "{} {}. {}",
                                 if i == 0 { "*" } else { " " },
                                 i + 1,
                                 item.name
@@ -132,13 +131,13 @@ impl BasicMenu {
                         console.read_line(&mut buf)?;
                         if let Ok(num) = buf.parse::<i32>() {
                             if num < 0 || num > k.len() as i32 {
-                                write!(console, "Invalid option.\n").core_err()?;
+                                writeln!(console, "Invalid option.").core_err()?;
                                 continue;
                             }
                             ret.push(BootOptionSelection::Multiple(num - 1));
                             break;
                         } else {
-                            write!(console, "Invalid option.\n").core_err()?;
+                            writeln!(console, "Invalid option.").core_err()?;
                             continue;
                         }
                     }
