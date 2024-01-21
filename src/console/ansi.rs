@@ -23,10 +23,10 @@ pub trait Terminal {
 pub struct ANSIConsole {}
 
 impl Terminal for ANSIConsole {
-    fn apply_style(s: &str, style: ConsoleStyle) -> String {
+    fn apply_style(_s: &str, _style: ConsoleStyle) -> String {
         String::new()
     }
-    fn set_pos(x: i32, y: i32) -> String {
+    fn set_pos(_x: i32, _y: i32) -> String {
         String::new()
     }
 

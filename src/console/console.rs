@@ -1,13 +1,3 @@
-use crate::console::serial::SerialConsole;
-use crate::io::console::Key;
-use crate::io::{console::Console, Read};
-use core::fmt::Write;
-use uefi::{
-    proto::console::text::{Input, Key as EFIKey, Output},
-    table::boot::ScopedProtocol,
-    Error,
-};
-
 /// Style of terminal text
 #[derive(Debug, Clone)]
 pub struct ConsoleStyle {

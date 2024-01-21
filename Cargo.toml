@@ -1,3 +1,7 @@
+[workspace]
+members = [
+	"xtask"
+]
 [package]
 name = "b2"
 version = "0.0.1"
@@ -7,10 +11,14 @@ edition = "2021"
 
 [dependencies]
 log = "0.4"
-uefi = {version = "0.19", features = ["alloc","unstable"]}
-uefi-services = {version = "0.16",default-features = false,features = ["logger"]}
 anyhow = {version = "1.0.69", default-features = false}
-once_cell = {version = "1.17.1", default-features = false, features= ["alloc"]}
+once_cell = {version = "1.17.1", default-features = false, features = ["alloc"]}
+thiserror = {version = "1.0", package = "thiserror-core", default-features = false}
+
+[target.'cfg(target_os = "uefi")'.dependencies]
+uefi = {version = "0.20", features = ["alloc","unstable"]}
+uefi-services = {version = "0.17", default-features = false, features = ["logger"]}
+
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 x86_64 = "0.14.10"

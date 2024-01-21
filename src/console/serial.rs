@@ -1,8 +1,9 @@
-use alloc::boxed::Box;
 use anyhow::{anyhow, Result};
 use uefi::{prelude::BootServices, proto::console::serial::Serial, table::boot::ScopedProtocol};
 
 use crate::io::Stream;
+
+/// Serial Console-specific methods
 pub trait SerialConsole: Stream {
     /// Set baud rate of serial port.
     ///
@@ -13,7 +14,7 @@ pub trait SerialConsole: Stream {
 
 /// EFI Serial Port
 pub struct EFISerial<'a> {
-    handler: ScopedProtocol<'a, Serial<'a>>,
+    handler: ScopedProtocol<'a, Serial>,
 }
 
 impl<'a> EFISerial<'a> {
@@ -21,7 +22,7 @@ impl<'a> EFISerial<'a> {
     unsafe fn init() {}
 
     /// Convert serial console handle to the struct.
-    fn from_efi_serial(serial: ScopedProtocol<'a, Serial<'a>>) -> Result<Self> {
+    fn from_efi_serial(serial: ScopedProtocol<'a, Serial>) -> Result<Self> {
         Ok(Self { handler: serial })
     }
 
@@ -38,16 +39,16 @@ impl<'a> EFISerial<'a> {
 }
 
 impl<'a> Stream for EFISerial<'a> {
-    fn read(&mut self, buf: &mut [u8]) -> Result<i32> {
+    fn read(&mut self, _buf: &mut [u8]) -> Result<i32> {
         Err(anyhow!("todo!"))
     }
-    fn write(&mut self, buf: &[u8]) -> Result<i32> {
+    fn write(&mut self, _buf: &[u8]) -> Result<i32> {
         Err(anyhow!("todo!"))
     }
 }
 
 impl<'a> SerialConsole for EFISerial<'a> {
-    fn set_baud_rate(baud: i32) -> Result<()> {
+    fn set_baud_rate(_baud: i32) -> Result<()> {
         Err(anyhow!("todo!"))
     }
 }

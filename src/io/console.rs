@@ -1,12 +1,9 @@
 use core::fmt::Write;
 
-use super::{meta::ReadOne, Read};
+use super::meta::ReadOne;
 use crate::console::console::ConsoleStyle;
 use anyhow::{anyhow, Result};
-use uefi::{
-    proto::console::text::{Key as EFIKey, ScanCode},
-    Char16,
-};
+use uefi::proto::console::text::{Key as EFIKey, ScanCode};
 /// Key struct - represents a key pressed.
 #[derive(Debug, Clone)]
 pub enum Key {
@@ -38,6 +35,7 @@ pub enum AcceleratorKey {
     F(u8),
 }
 
+#[derive(Debug, Clone)]
 pub enum ModifierKey {
     Ctrl,
     Shift,
@@ -70,30 +68,52 @@ impl From<EFIKey> for Key {
             EFIKey::Special(ScanCode::END) => Self::Accelerator(AcceleratorKey::End),
             EFIKey::Special(ScanCode::INSERT) => Self::Accelerator(AcceleratorKey::Insert),
             EFIKey::Special(ScanCode::DELETE) => Self::Accelerator(AcceleratorKey::Delete),
+            EFIKey::Special(ScanCode::FUNCTION_1) => Self::Accelerator(AcceleratorKey::F(1)),
+            EFIKey::Special(ScanCode::FUNCTION_2) => Self::Accelerator(AcceleratorKey::F(2)),
+            EFIKey::Special(ScanCode::FUNCTION_3) => Self::Accelerator(AcceleratorKey::F(3)),
+            EFIKey::Special(ScanCode::FUNCTION_4) => Self::Accelerator(AcceleratorKey::F(4)),
+            EFIKey::Special(ScanCode::FUNCTION_5) => Self::Accelerator(AcceleratorKey::F(5)),
+            EFIKey::Special(ScanCode::FUNCTION_6) => Self::Accelerator(AcceleratorKey::F(6)),
+            EFIKey::Special(ScanCode::FUNCTION_7) => Self::Accelerator(AcceleratorKey::F(7)),
+            EFIKey::Special(ScanCode::FUNCTION_8) => Self::Accelerator(AcceleratorKey::F(8)),
+            EFIKey::Special(ScanCode::FUNCTION_9) => Self::Accelerator(AcceleratorKey::F(9)),
+            EFIKey::Special(ScanCode::FUNCTION_10) => Self::Accelerator(AcceleratorKey::F(10)),
+            EFIKey::Special(ScanCode::FUNCTION_11) => Self::Accelerator(AcceleratorKey::F(11)),
+            EFIKey::Special(ScanCode::FUNCTION_12) => Self::Accelerator(AcceleratorKey::F(12)),
             EFIKey::Special(k) => Self::Unknown(k.0 as u8),
         }
     }
 }
 
-/// Terminal Struct
+/// Terminal Methods
 ///
 /// Text console with cursor control, reverse text and keyboard handler.
+///
+/// No cursor display control or echo control here.
+/// Cursor is always on, and to get a line secretly, use ReadSecret trait.
 pub trait Console: Write + ReadOne<Key> {
     /// Wait until a key pressed.
-    fn wait_for_key(&mut self) -> Result<Key>;
-    fn read_key(&mut self) -> Result<Option<Key>>;
+    fn wait_for_key(&mut self) -> Result<Key> {
+        self.read_one()
+    }
+    fn read_key(&mut self) -> Result<Option<Key>> {
+        self.read_one().map(|x| Some(x))
+    }
+
     /// Get current cursor position in terminal.
     ///
-    /// If a terminal does not support cursor position query,
-    /// then the terminal driver is required to maintain the state.
-    fn get_cursor(&mut self) -> Result<()>;
+    /// This function may always fail for some type of terminals.
+    fn get_cursor(&mut self) -> Result<()> {
+        Err(anyhow!("get_cursor() unsupported for current terminal."))
+    }
     /// Set cursor position in terminal.
     ///
     /// An error will be generated if cursor position is invalid.
     fn set_cursor(&mut self) -> Result<()>;
-    /// Write given text with given style.
-    fn write_with_style(&mut self, text: &[u8], style: ConsoleStyle) -> Result<()> {
-        todo!()
+    /// Write text at current curson with given style.
+    fn write_with_style(&mut self, text: &str, _style: ConsoleStyle) -> Result<()> {
+        self.write_str(text)
+            .map_err(|_| anyhow!("failed to write!"))
     }
 
     fn reset(&mut self) -> Result<()> {

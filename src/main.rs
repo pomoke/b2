@@ -2,36 +2,44 @@
 #![no_std]
 #![cfg_attr(target_os = "uefi", feature(abi_efiapi))]
 #![allow(stable_features)]
+#![feature(error_in_core)]
 #![feature(once_cell)]
 #![feature(result_flattening)]
+#![feature(exclusive_range_pattern)]
+#![feature(is_some_and)]
+#![feature(never_type)]
+
 extern crate alloc;
+mod boot;
 mod config;
 mod console;
 mod error;
 mod graphics;
 mod initedcell;
 mod io;
-mod linux;
 
 use core::arch::asm;
-use core::panic;
-use once_cell::unsync::OnceCell;
 
 use crate::console::efi::EFIConsole;
-use crate::io::ReadOne;
+use crate::io::{ReadSecret, ReadString};
 use alloc::boxed::Box;
+use alloc::string::String;
 use alloc::vec;
-use anyhow::{anyhow, Context};
+
+use anyhow::Context;
 use log::info;
 use uefi::prelude::*;
 use uefi::proto::console::gop::{BltOp, BltPixel, GraphicsOutput};
-use uefi::proto::console::{gop, serial as efi_serial, text};
+
 use uefi::proto::media::file::File;
 use uefi::proto::media::file::FileAttribute;
 use uefi::proto::media::file::FileInfo;
-use uefi::CStr16;
+
+use crate::boot::boot::BootAble;
+use crate::boot::efi::EFIBoot;
+use crate::error::ToError;
 use uefi::Result;
-use uefi_services::{println, system_table};
+use uefi_services::println;
 
 #[cfg(not(all(target_arch = "x86_64", target_os = "uefi")))]
 compile_error!("b2 only supports x86_64-unknown-uefi for now.");
@@ -98,29 +106,53 @@ fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
     info!("Version {}", st.firmware_revision());
     let rev = st.uefi_revision();
     let bs = st.boot_services();
+    //bs.set_watchdog_timer(0, 0, None).core_err().context("Failed to stop watchdog.").unwrap();
     info!("EFI {}.{}", rev.major(), rev.minor());
-    let mut root_protocol = bs.get_image_file_system(image_handle).unwrap();
+    let mut root_protocol = bs
+        .get_image_file_system(image_handle)
+        .expect("No root fs specified. b2 will not work.");
     let mut rootfs = root_protocol.open_volume().unwrap();
     println!("{:?}", rootfs.get_boxed_info::<FileInfo>().unwrap());
-    let mut file = rootfs
+    let file = rootfs
         .open(
-            cstr16!("efi\\boot\\bootx64.efi"),
+            cstr16!("\\efi\\boot\\bootx64.efi"),
             uefi::proto::media::file::FileMode::Read,
             FileAttribute::READ_ONLY,
         )
         .unwrap();
     let mut file = file.into_regular_file().unwrap();
-    let mut file_info: Box<FileInfo> = file.get_boxed_info().unwrap();
+    let file_info: Box<FileInfo> = file.get_boxed_info().unwrap();
     println!("file size {}", file_info.file_size());
     let mut buf = vec![];
     buf.resize(1024 * 1024, 0);
 
     let size = file.read(buf.as_mut_slice()).unwrap();
     println!("read {} bytes", size);
+    drop(root_protocol);
+    drop(rootfs);
+    drop(file);
+    drop(file_info);
 
     let mut console = EFIConsole::from_system_table();
+    let mut boot = EFIBoot::from_path("/linux/vmlinuz");
+    println!("こんにちは");
+    println!("你好");
+    println!("Jó napot");
+
     loop {
-        println!("{:?}", console.read_one().unwrap());
+        let mut s = String::new();
+        console.read_line(&mut s).unwrap();
+        println!("echo: {}", s);
+        if s == "boot" {
+            boot.boot().unwrap();
+        }
+        s.clear();
+        console.read_pass(&mut s).unwrap();
+        println!("echo: {}", s);
+        s.clear();
+        console.read_pass_star(&mut s).unwrap();
+        println!("echo: {}", s);
+        s.clear();
     }
 
     /*

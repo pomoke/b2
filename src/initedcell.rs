@@ -1,4 +1,4 @@
-use core::ops::{Deref, DerefMut};
+use core::ops::Deref;
 
 use once_cell::unsync::OnceCell;
 

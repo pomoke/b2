@@ -40,13 +40,13 @@ impl<T: SerialConsole, U: Terminal> SerialTerminal<T, U> {
 }
 
 impl<T: SerialConsole, U: Terminal> Write for SerialTerminal<T, U> {
-    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+    fn write_str(&mut self, _s: &str) -> core::fmt::Result {
         todo!()
     }
 }
 
 impl<T: SerialConsole, U: Terminal> Read<Key> for SerialTerminal<T, U> {
-    fn read(&mut self, buf: &mut [Key]) -> Result<i32> {
+    fn read(&mut self, _buf: &mut [Key]) -> Result<i32> {
         todo!()
     }
 }
@@ -70,7 +70,7 @@ impl<T: SerialConsole, U: Terminal> Console for SerialTerminal<T, U> {
         todo!()
     }
 
-    fn write_with_style(&mut self, text: &[u8], style: ConsoleStyle) -> Result<()> {
+    fn write_with_style(&mut self, _text: &str, _style: ConsoleStyle) -> Result<()> {
         todo!()
     }
 

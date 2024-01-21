@@ -90,7 +90,7 @@ pub enum BootTarget {
 
 #[derive(Debug, Clone)]
 pub enum ImageLocation {
-    /// A path in filesystem. EFI only.
+    /// A path in file system. EFI only.
     Path(String),
     /// A whole partition as image.
     /// TODO: Auto-detection of single image and compound partition.
