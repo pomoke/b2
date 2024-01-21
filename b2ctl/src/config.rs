@@ -1,34 +1,5 @@
-#![allow(unused)]
+use serde::{Deserialize, Serialize};
 
-extern crate alloc;
-use core::fmt::Display;
-
-use alloc::borrow::ToOwned;
-use alloc::string::String;
-use alloc::vec;
-use alloc::vec::Vec;
-use anyhow::anyhow;
-use log::info;
-use serde::Deserialize;
-use serde::Serialize;
-
-#[cfg(target_os = "uefi")]
-use crate::boot::boot::BootAble;
-#[cfg(target_os = "uefi")]
-use crate::platform::efi::boot::boot as platform_boot;
-#[cfg(target_os = "uefi")]
-use crate::platform::efi::boot::EFIBoot;
-#[cfg(target_os = "uefi")]
-use crate::platform::efi::efi_error::ToError;
-#[cfg(target_os = "uefi")]
-use crate::platform::println;
-
-pub(crate) mod boot_config;
-
-/// The configuration of b2.
-/// If config is unavailable or broken, b2 will simply load the fallback menu.
-/// Config can be stored in EFI variable or files in %ESP on UEFI-based machines.
-/// Config can be as well saved in NVRAM, a partition or in the bootloader.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     /// Alternative title.
@@ -84,11 +55,6 @@ impl Config {
                     name: "Debug Info".to_owned(),
                     target: BootTarget::Debug,
                 },
-                #[cfg(debug_assertions)]
-                BootItem {
-                    name: "Panic".to_owned(),
-                    target: BootTarget::Panic,
-                }
             ],
             default: 0,
             timeout: None,
@@ -109,7 +75,6 @@ pub struct BootItem {
 #[serde(tag = "type")]
 pub enum BootTarget {
     /// EFI image.
-    #[cfg(target_os = "uefi")]
     #[serde(rename = "efi")]
     EFI {
         path: String,
@@ -143,35 +108,18 @@ pub enum BootTarget {
     /// Nothing happens.
     #[serde(rename = "nop")]
     Nop,
-    /// Panics.
-    #[serde(rename = "panic")]
-    Panic,
-}
-
-impl BootTarget {
-    #[cfg(target_os = "uefi")]
-    pub fn boot(&self) -> anyhow::Result<bool> {
-        match self {
-            BootTarget::Exit => Ok(true),
-            BootTarget::Message(msg) => {
-                println!("{}", msg);
-                Ok(false)
-            }
-            BootTarget::Nop => Ok(false),
-            _ => platform_boot(self),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ImageLocation {
-    /// A path in file system. EFI only.
-    #[cfg(target_os = "uefi")]
     Path(String),
     /// A whole partition as image.
     /// TODO: Auto-detection of single image and compound partition.
-    Partition { disk: i32, part: i32 },
+    Partition {
+        disk: i32,
+        part: i32,
+    },
     /// Offsets in a partition.
     /// Use ioctl(FIBMAP) to get offsets of kernel image.
     Segments {
@@ -184,6 +132,7 @@ pub enum ImageLocation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub struct Extent {
     from: u32,
     length: u32,

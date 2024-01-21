@@ -9,9 +9,9 @@ use uefi::{
 };
 use uefi_services::system_table;
 
-use crate::error::ToError;
+use crate::platform::ToError;
 
-use super::File;
+use crate::io::file::File;
 
 pub struct EFIFile {
     file: FileHandle,
@@ -19,7 +19,7 @@ pub struct EFIFile {
 
 impl File<EFIFile> {
     pub fn open(path: &str) -> Result<Self> {
-        let st = unsafe { system_table().as_mut() };
+        let st = unsafe { system_table() };
         let bs = st.boot_services();
         let image_handle = bs.image_handle();
         let mut root_protocol = bs.get_image_file_system(image_handle).core_err()?;
@@ -54,6 +54,7 @@ impl File<EFIFile> {
         let info = file.get_boxed_info::<FileInfo>().core_err()?;
         let size = info.file_size();
         let mut buf = Vec::new();
+        buf.try_reserve(size as usize).core_err()?;
         buf.resize(size as usize, 0);
         file.read(&mut buf).core_err()?;
         Ok(buf)

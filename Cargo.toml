@@ -1,7 +1,6 @@
 [workspace]
-members = [
-	"xtask"
-]
+members = [ "b2ctl", "xtask"]
+
 [package]
 name = "b2"
 version = "0.0.1"
@@ -11,22 +10,40 @@ edition = "2021"
 
 [dependencies]
 log = "0.4"
-anyhow = {version = "1.0.69", default-features = false}
-once_cell = {version = "1.17.1", default-features = false, features = ["alloc"]}
+anyhow = {version = "1.0.79", default-features = false}
+once_cell = {version = "1.19", default-features = false, features = ["alloc"]}
 thiserror = {version = "1.0", package = "thiserror-core", default-features = false}
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde-json-core = "0.5.1"
 
 [target.'cfg(target_os = "uefi")'.dependencies]
-uefi = {version = "0.20", features = ["alloc","unstable"]}
-uefi-services = {version = "0.17", default-features = false, features = ["logger"]}
-
+uefi = {version = "0.26", features = ["alloc","unstable"]}
+uefi-services = {version = "0.23", default-features = false, features = ["logger"]}
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 x86_64 = "0.14.10"
+
+[target.'cfg(std)'.dependencies]
+serde_json = "1.0"
 
 [features]
 default = ["password", "edit"]
 graphic = []
 password = []
 edit = []
+
 # Put config file in src/config.toml .
 embedded-config = []
+
+[profile.release]
+debug = "full"
+
+[profile.release-compact]
+inherits = "release"
+debug = "full"
+lto = true
+opt-level = "z"
+codegen-units = 1
+panic = "abort"
+# Comment this line out to use cargo-bloat.
+#strip = true 

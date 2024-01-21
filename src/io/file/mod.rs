@@ -1,7 +1,7 @@
-pub mod efi;
+//pub mod efi;
 
 pub struct File<T> {
-    backend: T,
+    pub backend: T,
 }
 
 impl<T> File<T> {

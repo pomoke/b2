@@ -1,7 +1,3 @@
 //! Config file
 //! 
-//! This file is not part of source code.
-
-
-
-
+//! This file is not part of copyrighted source code.
