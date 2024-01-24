@@ -164,24 +164,22 @@ impl<T: ?Sized + Console> LineEdit for T {
                         if str_pos + 1 == buf.len() {
                             // Append
                             redraw = (str_pos - left_pos + prompt.len()) >= (size.0 - 2);
-                            left_pos =
-                                if (str_pos - left_pos + prompt.len() ) < (size.0 - 2) {
-                                    left_pos
-                                } else {
-                                    left_pos + 1
-                                };
+                            left_pos = if (str_pos - left_pos + prompt.len()) < (size.0 - 2) {
+                                left_pos
+                            } else {
+                                left_pos + 1
+                            };
                             if !redraw {
                                 self.write_char(k).core_err()?
                             };
                         } else {
                             // Insert
                             redraw = true;
-                            left_pos =
-                                if (str_pos - left_pos + prompt.len() ) < (size.0 - 2) {
-                                    left_pos
-                                } else {
-                                    left_pos + 1
-                                };
+                            left_pos = if (str_pos - left_pos + prompt.len()) < (size.0 - 2) {
+                                left_pos
+                            } else {
+                                left_pos + 1
+                            };
                         }
                         str_pos += 1;
                         // redraw or print character out.
