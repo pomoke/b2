@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
 use config::{BootItem, BootTarget, Config};
-
+use serde::{Deserialize, Serialize};
 
 pub fn fallback_menu() -> Config {
     Config {

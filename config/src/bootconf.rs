@@ -42,6 +42,9 @@ pub enum BootOptionKind {
     ///
     /// Example: `root={}`
     Template(String),
+    /// Unknown, for compability
+    #[serde(other)]
+    Default,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -58,5 +61,6 @@ pub enum BootOptionSelection {
     Bool(bool),
     Multiple(i32),
     Template(Option<String>),
+    #[serde(other)]
     Default,
 }

@@ -104,6 +104,8 @@ pub enum ImageLocation {
         /// No support for non-continous file for now.
         segment: Extent,
     },
+    #[serde(other)]
+    Unknown,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

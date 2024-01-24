@@ -23,10 +23,7 @@ impl BasicMenu {
     ///
     pub fn render(config: &Config, console: &mut dyn Console) -> Result<()> {
         // Show title
-        let title = config
-            .name
-            .as_deref()
-            .unwrap_or("b2 loader");
+        let title = config.name.as_deref().unwrap_or("b2 loader");
         writeln!(console, "{}", title).map_err(|_| anyhow!("failed to write"))?;
         // Show message
         if let Some(msg) = config.message.as_ref() {
@@ -153,6 +150,7 @@ impl BasicMenu {
                         ret.push(BootOptionSelection::Template(Some(buf.clone())));
                         break;
                     }
+                    _ => unreachable!()
                 }
             }
         }
