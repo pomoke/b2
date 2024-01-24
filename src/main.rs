@@ -8,6 +8,7 @@
 #![feature(exclusive_range_pattern)]
 #![feature(is_some_and)]
 #![feature(never_type)]
+#![feature(cfg_match)]
 
 // b2 has not been tested on architectures other than x86_64.
 

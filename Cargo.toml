@@ -19,7 +19,7 @@ config = {path = "./config", default-features = false, features = ["no_std"]}
 
 [target.'cfg(target_os = "uefi")'.dependencies]
 uefi = {version = "0.26", features = ["alloc","unstable"]}
-uefi-services = {version = "0.23", default-features = false, features = ["logger"]}
+uefi-services = {version = "0.23", default-features = false, features = []}
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 x86_64 = "0.14.10"

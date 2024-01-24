@@ -20,6 +20,7 @@ use crate::console::basicmenu::BasicMenu;
 use crate::platform::efi::boot::EFIBoot;
 use crate::platform::efi::efi_error::ToError;
 use crate::platform::efi::file::EFIFile;
+use crate::platform::efi::logger::set_efi_var_logger;
 use config::Config;
 use uefi::Result;
 use uefi_services::println;
@@ -82,11 +83,17 @@ pub fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
     use anyhow::anyhow;
     use uefi::{guid, table::runtime::VariableVendor};
 
-    use crate::{io::file::File, config::{BootConfig, do_boot}};
+    use crate::{
+        config::{do_boot, BootConfig},
+        io::file::File,
+    };
 
     use config::{BootOption, BootOptionItem, BootOptionKind};
 
     uefi_services::init(&mut st).unwrap();
+
+    println!("Setting Logger...");
+    set_efi_var_logger();
     let rev = st.uefi_revision();
     let bs = st.boot_services();
     let rs = st.runtime_services();
@@ -98,21 +105,19 @@ pub fn main(image_handle: Handle, mut st: SystemTable<Boot>) -> Status {
 
     //bs.set_watchdog_timer(0, 0, None).core_err().context("Failed to stop watchdog.").unwrap();
 
-    let mut config: BootConfig =
-        File::<EFIFile>::open("b2.conf")
-            .and_then(|x| x.read_all())
-            .or_else(|_| {
-                rs.get_variable_boxed(cstr16!("Config"), &VariableVendor(B2_UUID))
-                    .core_err()
-                    .map(|x| x.0.into_vec())
-            })
-            .and_then(|x| {
-                serde_json_core::from_slice::<Config>(x.as_slice())
-                    .map_err(|x| anyhow!("{}", x))
-            })
-            .map(|x| BootConfig(x.0))
-            .inspect_err(|e| println!("error loading config: {:?}", e))
-            .unwrap_or(BootConfig::fallback_menu());
+    let mut config: BootConfig = File::<EFIFile>::open("b2.conf")
+        .and_then(|x| x.read_all())
+        .or_else(|_| {
+            rs.get_variable_boxed(cstr16!("Config"), &VariableVendor(B2_UUID))
+                .core_err()
+                .map(|x| x.0.into_vec())
+        })
+        .and_then(|x| {
+            serde_json_core::from_slice::<Config>(x.as_slice()).map_err(|x| anyhow!("{}", x))
+        })
+        .map(|x| BootConfig(x.0))
+        .inspect_err(|e| println!("error loading config: {:?}", e))
+        .unwrap_or(BootConfig::fallback_menu());
 
     let mut console = EFIConsole::from_system_table();
     let boot_config = BootConfig::fallback_menu();
