@@ -1,0 +1,24 @@
+[package]
+name = "b2"
+version = "0.0.1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = "0.4"
+uefi = {version = "0.19", features = ["alloc","unstable"]}
+uefi-services = {version = "0.16",default-features = false,features = ["logger"]}
+anyhow = {version = "1.0.69", default-features = false}
+once_cell = {version = "1.17.1", default-features = false, features= ["alloc"]}
+
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+x86_64 = "0.14.10"
+
+[features]
+default = ["password", "edit"]
+graphic = []
+password = []
+edit = []
+# Put config file in src/config.toml .
+embedded-config = []
