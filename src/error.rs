@@ -19,8 +19,6 @@ pub enum B2Error {
     Unknown,
     #[error("not a file")]
     NotFile,
-    #[error("To be implmented.")]
-    Todo,
     #[error(transparent)]
     PlatformError(PlatformError),
 }
