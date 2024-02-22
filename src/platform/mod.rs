@@ -5,7 +5,12 @@ pub mod efi;
 pub use {efi::efi_error::ToError, uefi_services::println};
 
 #[cfg(target_os = "uefi")]
-type PlatformFile = efi::file::EFIFile;
+pub type PlatformFile = efi::file::EFIFile;
 
 #[cfg(target_os = "uefi")]
-type PlatformConsole = efi::console::EFIConsole;
+pub type PlatformConsole = efi::console::EFIConsole;
+
+// PlatformError contains a lifetime for use with error message.
+
+#[cfg(target_os = "uefi")]
+pub type PlatformError = efi::error::EfiError;

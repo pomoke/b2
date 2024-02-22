@@ -150,7 +150,7 @@ impl BasicMenu {
                         ret.push(BootOptionSelection::Template(Some(buf.clone())));
                         break;
                     }
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
         }

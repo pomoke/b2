@@ -1,3 +1,5 @@
+use core::ops::BitOr;
+
 /// Style of terminal text
 #[derive(Debug, Clone)]
 pub struct ConsoleStyle {
@@ -6,8 +8,6 @@ pub struct ConsoleStyle {
     /// Highlighted text.
     reverse: bool,
     /// Blinking text.
-    ///
-    /// Note: This style may be disractive.
     blink: bool,
 }
 

@@ -4,7 +4,7 @@
 use alloc::vec;
 use alloc::{borrow::ToOwned, string::String, vec::Vec};
 use anyhow::{anyhow, Context};
-use log::{info, log, warn};
+use log::{error, info, log, warn};
 use uefi::proto::device_path::text::{AllowShortcuts, DisplayOnly};
 use uefi::table::runtime::{ResetType, VariableAttributes, VariableVendor};
 use uefi::{cstr16, Status};
@@ -116,7 +116,6 @@ impl BootAble for EFIBoot {
             .map_err(|_| anyhow!("Failed to convert to rust string."))?;
         let full_path =
             CString16::try_from(full_path.as_str()).map_err(|_| anyhow!("failed to convert"))?;
-        println!("{}", full_path);
         let full_path = device_path_from_text
             .convert_text_to_device_path(&full_path)
             .core_err()?;
@@ -140,10 +139,13 @@ impl BootAble for EFIBoot {
         unsafe {
             image_protocol.set_load_options(config.as_ptr() as *const u8, config.num_bytes() as u32)
         };
+        info!("Booting image {}, cmdline {}", self.path, self.cmdline.as_deref().unwrap_or("<unspecified>"));
         // Start image.
         bs.start_image(image).core_err()?;
-        Err(anyhow!("unknown error. we successfully boot an image and returned. this should not happen for a program."))
+        error!("started image, but returned.");
+        Err(anyhow!("unknown error. we successfully boot an image and returned. this should not happen."))
     }
+
     fn load(&mut self) -> anyhow::Result<()> {
         todo!()
     }
