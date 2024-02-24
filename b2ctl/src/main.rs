@@ -1,4 +1,7 @@
 use crate::args::Cli;
+use argon2::{password_hash::{rand_core::{CryptoRng, CryptoRngCore}, SaltString}, Argon2, PasswordHasher};
+use constant_time_eq::constant_time_eq;
+use rand::rngs::OsRng;
 use clap::Parser;
 use config::Config;
 pub mod args;
@@ -39,6 +42,18 @@ fn main() {
             });
             let s = serde_json::to_string_pretty(&conf);
             println!("{}", s.unwrap());
+        }
+        args::Commands::Password => {
+            let password = rpassword::prompt_password("Password: ").unwrap();
+            let password_repeat = rpassword::prompt_password("Repeat Password: ").unwrap();
+            if ! constant_time_eq(password.as_bytes(), password_repeat.as_bytes()) {
+                eprintln!("Password mismatch.");
+                std::process::exit(1);
+            }
+            let argon2 = Argon2::default();
+            let salt = SaltString::generate(&mut OsRng);
+            let pwhash = argon2.hash_password(password.as_bytes(), &salt).unwrap();
+            println!("\n{}",pwhash);
         }
     }
 }

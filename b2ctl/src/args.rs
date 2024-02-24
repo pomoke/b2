@@ -15,4 +15,6 @@ pub(crate) enum Commands {
     Check { config: PathBuf },
     /// Send sample config file to stdout.
     Sample,
+    /// Generate hashed password for use with b2.
+    Password,
 }
