@@ -49,7 +49,7 @@ fn main() {
             let s = serde_json::to_string_pretty(&conf);
             println!("{}", s.unwrap());
         }
-        args::Commands::Password {m,t} => {
+        args::Commands::Password { m, t } => {
             let password = rpassword::prompt_password("Password: ").unwrap();
             let password_repeat = rpassword::prompt_password("Repeat Password: ").unwrap();
             if !constant_time_eq(password.as_bytes(), password_repeat.as_bytes()) {

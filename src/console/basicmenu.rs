@@ -1,8 +1,12 @@
+use crate::io::console::CursorStyle;
 use crate::platform::ToError;
 use alloc::format;
 use alloc::string::String;
 use anyhow::anyhow;
 use anyhow::Result;
+use argon2::Argon2;
+use argon2::PasswordHash;
+use argon2::PasswordVerifier;
 use config::BootOption;
 use config::BootOptionKind;
 use config::BootOptionSelection;
@@ -38,6 +42,27 @@ impl BasicMenu {
         Ok(())
     }
 
+    #[cfg(feature = "password")]
+    pub fn verify(config: &Config, console: &mut dyn Console) -> Result<()> {
+        if let Some(phc) = config.password.as_deref() {
+            let argon2 = Argon2::default();
+            let hash = PasswordHash::new(&phc).map_err(|e| anyhow!("password: {}", e))?;
+            loop {
+                let mut passwd = String::new();
+                console.edit_line(&mut passwd, "Password: ");
+                match argon2.verify_password(passwd.as_bytes(), &hash) {
+                    Ok(_) => {
+                        break;
+                    }
+                    Err(e) => {
+                        writeln!(console, "Failed to verify password.");
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
     /// Read selected boot option.
     ///
     pub fn prompt<'a>(
@@ -45,6 +70,9 @@ impl BasicMenu {
         config: &'a Config,
         console: &mut dyn Console,
     ) -> Result<&'a BootItem> {
+        #[cfg(feature = "password")]
+        Self::verify(config, console)?;
+
         Self::render(config, console)?;
         let len = config.items.len();
         loop {

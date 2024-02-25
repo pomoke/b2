@@ -32,6 +32,8 @@ default = ["password", "edit"]
 graphic = []
 
 # Password lock for the bootloader.
+#
+# Adds ~17.5 KB in release mode.
 password = ["argon2"]
 
 # Line editing capability.
@@ -47,12 +49,14 @@ embedded-config = []
 [profile.release]
 debug = "full"
 
-[profile.release-compact]
+[profile.release-compact-analyze]
 inherits = "release"
-debug = "full"
+debug = "line-tables-only"
 lto = true
 opt-level = "z"
 codegen-units = 1
 panic = "abort"
-# Comment this line out to use cargo-bloat.
-#strip = true 
+
+[profile.release-compact]
+inherits = "release-compact-analyze"
+strip = true 
