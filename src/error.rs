@@ -1,5 +1,5 @@
-use thiserror::Error;
 use crate::platform::PlatformError;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum B2Error {

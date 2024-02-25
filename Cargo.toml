@@ -16,6 +16,7 @@ thiserror = {version = "1.0", package = "thiserror-core", default-features = fal
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde-json-core = "0.5.1"
 config = {path = "./config", default-features = false, features = ["no_std"]}
+argon2 = {version = "0.5.3", optional = true}
 
 [target.'cfg(target_os = "uefi")'.dependencies]
 uefi = {version = "0.26", features = ["alloc","unstable"]}
@@ -30,8 +31,8 @@ default = ["password", "edit"]
 # Graphical Interface (TODO)
 graphic = []
 
-# Password lock for the bootloader. (TODO)
-password = []
+# Password lock for the bootloader.
+password = ["argon2"]
 
 # Line editing capability.
 # If this is not enabled, inputs can't be navigated or edited in the middle.

@@ -14,5 +14,5 @@ pub enum EfiError {
     #[error("Failed to get variable {1}, reason {0}")]
     GetEfiVariable(uefi::Error, String),
     #[error("Failed to open protocol, efi error {0}")]
-    OpenProtocol(uefi::Error)
+    OpenProtocol(uefi::Error),
 }

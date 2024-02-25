@@ -139,11 +139,17 @@ impl BootAble for EFIBoot {
         unsafe {
             image_protocol.set_load_options(config.as_ptr() as *const u8, config.num_bytes() as u32)
         };
-        info!("Booting image {}, cmdline {}", self.path, self.cmdline.as_deref().unwrap_or("<unspecified>"));
+        info!(
+            "Booting image {}, cmdline {}",
+            self.path,
+            self.cmdline.as_deref().unwrap_or("<unspecified>")
+        );
         // Start image.
         bs.start_image(image).core_err()?;
         error!("started image, but returned.");
-        Err(anyhow!("unknown error. we successfully boot an image and returned. this should not happen."))
+        Err(anyhow!(
+            "unknown error. we successfully boot an image and returned. this should not happen."
+        ))
     }
 
     fn load(&mut self) -> anyhow::Result<()> {

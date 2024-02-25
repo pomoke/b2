@@ -16,5 +16,12 @@ pub(crate) enum Commands {
     /// Send sample config file to stdout.
     Sample,
     /// Generate hashed password for use with b2.
-    Password,
+    Password {
+        /// Memory size for argon2id, in KB.
+        #[arg(short)]
+        m: Option<u32>,
+        /// Number of iterations for argon2id.
+        #[arg(short)]
+        t: Option<u32>,
+    },
 }

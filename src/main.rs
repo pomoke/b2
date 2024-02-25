@@ -19,11 +19,11 @@ extern crate alloc;
 mod boot;
 pub mod config;
 mod console;
+pub mod error;
 mod graphics;
 mod initedcell;
 mod io;
 mod platform;
-pub mod error;
 
 // This file does not contain actual entrypoint.
 //
